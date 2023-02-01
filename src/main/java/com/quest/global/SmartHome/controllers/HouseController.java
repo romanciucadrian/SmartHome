@@ -47,7 +47,8 @@ public class HouseController {
     }
 
     @PutMapping("{houseName}")
-    public ResponseEntity<?> updateHouseByName(@PathVariable String houseName, String houseNewName) {
+    public ResponseEntity<?> updateHouseByName(@PathVariable("houseName") String houseName,
+                                               @RequestParam("houseNewName") String houseNewName) {
 
         try {
             return new

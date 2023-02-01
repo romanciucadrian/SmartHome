@@ -64,7 +64,7 @@ public class WebSecurityConfig {
                 .antMatchers("/api/users/**").permitAll()
                 .antMatchers("/api/mqtt").permitAll()
                 .antMatchers("/api/mqtt/{deviceHexName}").permitAll()
-                .antMatchers("/api/users").permitAll()
+                .antMatchers("/api/users/").permitAll()
                 .antMatchers("/api/rooms/{houseID}").permitAll()
                 .antMatchers("/v2/api-docs",
                         "/configuration/ui",

@@ -25,5 +25,7 @@ public class Role {
     @Field(name = "NormalizedName")
     private String normalizedName;
 
-
+    public Role(String name) {
+        this.name = name;
+    }
 }
