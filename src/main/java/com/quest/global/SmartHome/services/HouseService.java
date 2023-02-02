@@ -46,6 +46,19 @@ public class HouseService implements IHouseService {
     }
 
     @Transactional
+    public HouseDTO findHouseByName(String houseName) throws HouseNotFoundException {
+
+        HouseDTO houseDTO =
+                mapStructMapper.houseToHouseDTO(houseRepository.findByName(houseName));
+
+        if (houseDTO != null) {
+            return houseDTO;
+        } else {
+            throw new HouseNotFoundException("Can't find this House Name " + houseName);
+        }
+    }
+
+    @Transactional
     public House createHouse(House house) {
 
        houseRepository.save(house);
