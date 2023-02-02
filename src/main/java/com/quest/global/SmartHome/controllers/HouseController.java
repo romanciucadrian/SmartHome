@@ -69,9 +69,8 @@ public class HouseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<HouseDTO>> getAll() {
-        return new ResponseEntity<>(mapStructMapper.housesToHouseDTOs(houseService.listAll()
-        ),
+    public ResponseEntity<List<House>> getAll() {
+        return new ResponseEntity<>(houseService.listAll(),
                 HttpStatus.OK
         );
     }
