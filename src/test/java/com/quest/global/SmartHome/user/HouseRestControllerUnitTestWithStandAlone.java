@@ -46,8 +46,11 @@ public class HouseRestControllerUnitTestWithStandAlone {
     @Mock
     private HouseService houseService;
 
+    private MapStructMapperImpl mapper =
+            new MapStructMapperImpl();
 
-    private MapStructMapperImpl mapper = new MapStructMapperImpl();
+    private final ObjectMapper objectMapper =
+            new ObjectMapper();
 
     @InjectMocks
     private HouseController houseController;
@@ -64,55 +67,55 @@ public class HouseRestControllerUnitTestWithStandAlone {
                 .build();
     }
 
-//    @Test
-//    public void testUpdateHouseName() throws Exception {
-//
-//        // Given
-//        String houseName = "AdrianROM4";
-//        String houseNewName = "AdrianROM5";
-//
-//        House updatedHouse = new House();
-//        updatedHouse.setName(houseNewName);
-//        updatedHouse.setRooms(new ArrayList<>());
-//        updatedHouse.setDevicesList(new ArrayList<>());
-//
-//        // When
-//        when(houseService.updateHouseName(houseName, houseNewName)).thenReturn(updatedHouse);
-//
-//        mockMvc.perform(put("/api/houses/{houseName}", houseName)
-//                        .param("houseNewName", houseNewName)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk());
-//
-//        // Then
-//        verify(houseService, times(1)).updateHouseName(houseName, houseNewName);
-//
-//    }
+    @Test
+    public void testUpdateHouseName() throws Exception {
 
-//    @Test
-//    public void testRetrieveHouseByID() throws Exception {
-//
-//        // Given
-//        ObjectId id = new ObjectId("637cb085be36767eae89c267");
-//        HouseRepository mockRepository = mock(HouseRepository.class);
-//        House mockHouse = new House();
-//
-//        mockHouse.setId(id);
-//        mockHouse.setName("CasaMEA");
-//        mockHouse.setRooms(new ArrayList<>());
-//        mockHouse.setDevicesList(new ArrayList<>());
-//
-//        // When
-//        MockHttpServletResponse response = mockMvc.perform(
-//                get("/api/houses/{id}", id)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andReturn().getResponse();
-//
-//        // Then
-//        assertThat(response.getStatus())
-//                .isEqualTo(HttpStatus.OK.value());
-//
-//    }
+        // Given
+        String houseName = "AdrianROM4";
+        String houseNewName = "AdrianROM5";
+
+        House updatedHouse = new House();
+        updatedHouse.setName(houseNewName);
+        updatedHouse.setRooms(new ArrayList<>());
+        updatedHouse.setDevicesList(new ArrayList<>());
+
+        // When
+        when(houseService.updateHouseName(houseName, houseNewName)).thenReturn(updatedHouse);
+
+        mockMvc.perform(put("/api/houses/{houseName}", houseName)
+                        .param("houseNewName", houseNewName)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // Then
+        verify(houseService, times(1)).updateHouseName(houseName, houseNewName);
+
+    }
+
+    @Test
+    public void testRetrieveHouseByID() throws Exception {
+
+        // Given
+        ObjectId id = new ObjectId("637cb085be36767eae89c267");
+        HouseRepository mockRepository = mock(HouseRepository.class);
+        House mockHouse = new House();
+
+        mockHouse.setId(id);
+        mockHouse.setName("CasaMEA");
+        mockHouse.setRooms(new ArrayList<>());
+        mockHouse.setDevicesList(new ArrayList<>());
+
+        // When
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/houses/{id}", id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        // Then
+        assertThat(response.getStatus())
+                .isEqualTo(HttpStatus.OK.value());
+
+    }
 
     @Test
     public void testRetrieveHouseByNameWhenExists() throws Exception {
@@ -128,31 +131,38 @@ public class HouseRestControllerUnitTestWithStandAlone {
                 .willReturn(expectedHouse);
 
         // When
-        String responseJson = mockMvc.perform(get("/api/houses/" + houseName)
+        String responseJson = mockMvc.perform(get("/api/houses/")
+                        .param("houseName", houseName)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         // Then
-        assertThat(responseJson).isEqualTo(expectedHouse.toString());
+        HouseDTO actualHouse = objectMapper.readValue(responseJson, HouseDTO.class);
+        assertThat(actualHouse).isEqualTo(expectedHouse);
     }
 
 
     @Test
     public void getHouseByName_ReturnsErrorMessage_WhenHouseNotFound() throws Exception {
+
+        // Given
         String houseName = "Test House";
         String expectedErrorMessage = "House not found";
 
+        // When
         when(houseService.findHouseByName(houseName))
                 .thenThrow(new HouseNotFoundException(expectedErrorMessage));
 
         mockMvc = MockMvcBuilders.standaloneSetup(houseController).build();
 
-        String responseJson = mockMvc.perform(get("/api/houses/" + houseName)
+        String responseJson = mockMvc.perform(get("/api/houses/")
+                        .param("houseName", houseName)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
+        // Then
         assertThat(responseJson).isEqualTo(expectedErrorMessage);
     }
 

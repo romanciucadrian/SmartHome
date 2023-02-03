@@ -30,21 +30,21 @@ public class HouseController {
         return houseService.createHouse(house);
     }
 
-//    @GetMapping("{id}")
-//    public ResponseEntity<?> getHouseById(@PathVariable ObjectId id) {
-//
-//        try {
-//          return ResponseEntity.ok(houseService.findHouseByID(id));
-//
-//        } catch (HouseNotFoundException e) {
-//            return ResponseEntity
-//                    .status(HttpStatus.NOT_FOUND)
-//                    .body(e.getMessage());
-//        }
-//    }
+    @GetMapping("{id}")
+    public ResponseEntity<?> getHouseById(@PathVariable ObjectId id) {
 
-    @GetMapping("{houseName}")
-    public ResponseEntity<?> getHouseByName(@PathVariable String houseName) {
+        try {
+          return ResponseEntity.ok(houseService.findHouseByID(id));
+
+        } catch (HouseNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping(params = "houseName")
+    public ResponseEntity<?> getHouseByName(@RequestParam String houseName) {
 
         try {
             return new ResponseEntity<>(houseService.findHouseByName(houseName),

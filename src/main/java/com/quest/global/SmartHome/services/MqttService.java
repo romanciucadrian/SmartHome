@@ -29,7 +29,6 @@ public class MqttService implements IMqttService {
     private static final Logger logger = LoggerFactory.getLogger(MqttService.class);
     private final ObjectMapper objectMapper;
     private final DeviceRepository deviceRepository;
-    private final DeviceTypeRepository deviceTypeRepository;
     private final MqttConfig mqttConfig;
     private final MapStructMapper mapStructMapper;
     private final CommandRepository commandRepository;
@@ -40,10 +39,11 @@ public class MqttService implements IMqttService {
     @Value("${mqtt.subscribe.topic}")
     private String subscribeTopic;
 
-    public MqttService(ObjectMapper objectMapper, DeviceRepository deviceRepository, DeviceTypeRepository deviceTypeRepository, MqttConfig mqttConfig, MapStructMapper mapStructMapper, CommandRepository commandRepository, CommandService commandService) {
+    public MqttService(ObjectMapper objectMapper, DeviceRepository deviceRepository, MqttConfig mqttConfig,
+                       MapStructMapper mapStructMapper, CommandRepository commandRepository, CommandService commandService) {
+
         this.objectMapper = objectMapper;
         this.deviceRepository = deviceRepository;
-        this.deviceTypeRepository = deviceTypeRepository;
         this.mqttConfig = mqttConfig;
         this.mapStructMapper = mapStructMapper;
         this.commandRepository = commandRepository;
