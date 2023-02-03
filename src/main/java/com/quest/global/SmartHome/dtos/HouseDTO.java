@@ -13,6 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 public class HouseDTO {
 
+    private ObjectId id;
+
     private String name;
 
     private List<ObjectId> rooms;

@@ -21,8 +21,10 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
@@ -121,7 +123,7 @@ public class HouseRestControllerUnitTestWithStandAlone {
     public void testRetrieveHouseByNameWhenExists() throws Exception {
 
         // Given
-        ObjectId id = new ObjectId();
+        ObjectId id = ObjectId.get();
         String houseName = "MyHouse";
 
         HouseDTO expectedHouse =
@@ -142,6 +144,58 @@ public class HouseRestControllerUnitTestWithStandAlone {
         assertThat(actualHouse).isEqualTo(expectedHouse);
     }
 
+    @Test
+    public void testGetHouseByID_Success() throws Exception {
+
+        // Given
+        ObjectId id =
+                ObjectId.get();
+
+        House house =
+                new House();
+
+        house.setId(id);
+        house.setName("AdrianHouse");
+        house.setRooms(new ArrayList<>());
+        house.setDevicesList(new ArrayList<>());
+
+        HouseDTO expectedHouse = mapper.houseToHouseDTO(house);
+
+        given(houseService.findHouseByID(id)).willReturn(expectedHouse);
+
+        // When
+        String responseJson =
+                mockMvc.perform(get("/api/houses/" + id)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        // Then
+        HouseDTO actualHouse = objectMapper.readValue(responseJson, HouseDTO.class);
+        assertThat(actualHouse).isEqualTo(expectedHouse);
+
+    }
+
+    @Test
+    public void testGetHouseByID_WhenNotFound() throws Exception {
+
+        // Given
+        ObjectId id = ObjectId.get();
+        String errorMsg = "House ID not found!";
+
+        given(houseService.findHouseByID(id)).willThrow(new HouseNotFoundException(errorMsg));
+
+        // When
+        String responseJson = mockMvc.perform(get("/api/houses/" + id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        // Then
+        assertThat(responseJson).isEqualTo(errorMsg);
+
+    }
+
 
     @Test
     public void getHouseByName_ReturnsErrorMessage_WhenHouseNotFound() throws Exception {
@@ -153,8 +207,6 @@ public class HouseRestControllerUnitTestWithStandAlone {
         // When
         when(houseService.findHouseByName(houseName))
                 .thenThrow(new HouseNotFoundException(expectedErrorMessage));
-
-        mockMvc = MockMvcBuilders.standaloneSetup(houseController).build();
 
         String responseJson = mockMvc.perform(get("/api/houses/")
                         .param("houseName", houseName)
