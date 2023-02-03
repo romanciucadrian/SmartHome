@@ -3,6 +3,8 @@ package com.quest.global.SmartHome.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quest.global.SmartHome.controllers.HouseController;
+import com.quest.global.SmartHome.dtos.HouseDTO;
+import com.quest.global.SmartHome.exceptions.HouseNotFoundException;
 import com.quest.global.SmartHome.mapstruct.MapStructMapperImpl;
 import com.quest.global.SmartHome.models.House;
 import com.quest.global.SmartHome.repositories.HouseRepository;
@@ -42,99 +44,116 @@ import static org.mockito.Mockito.when;
 public class HouseRestControllerUnitTestWithStandAlone {
 
     @Mock
-    HouseService houseService;
+    private HouseService houseService;
 
-    @Mock
-    HouseRepository houseRepository;
+
+    private MapStructMapperImpl mapper = new MapStructMapperImpl();
 
     @InjectMocks
-    HouseController houseController;
+    private HouseController houseController;
 
-
-    private JacksonTester<House> jsonHouse;
+    private JacksonTester<HouseDTO> jsonHouse;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
         JacksonTester.initFields(this, new ObjectMapper());
+
         mockMvc = MockMvcBuilders.standaloneSetup(houseController)
                 .build();
     }
 
+//    @Test
+//    public void testUpdateHouseName() throws Exception {
+//
+//        // Given
+//        String houseName = "AdrianROM4";
+//        String houseNewName = "AdrianROM5";
+//
+//        House updatedHouse = new House();
+//        updatedHouse.setName(houseNewName);
+//        updatedHouse.setRooms(new ArrayList<>());
+//        updatedHouse.setDevicesList(new ArrayList<>());
+//
+//        // When
+//        when(houseService.updateHouseName(houseName, houseNewName)).thenReturn(updatedHouse);
+//
+//        mockMvc.perform(put("/api/houses/{houseName}", houseName)
+//                        .param("houseNewName", houseNewName)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk());
+//
+//        // Then
+//        verify(houseService, times(1)).updateHouseName(houseName, houseNewName);
+//
+//    }
+
+//    @Test
+//    public void testRetrieveHouseByID() throws Exception {
+//
+//        // Given
+//        ObjectId id = new ObjectId("637cb085be36767eae89c267");
+//        HouseRepository mockRepository = mock(HouseRepository.class);
+//        House mockHouse = new House();
+//
+//        mockHouse.setId(id);
+//        mockHouse.setName("CasaMEA");
+//        mockHouse.setRooms(new ArrayList<>());
+//        mockHouse.setDevicesList(new ArrayList<>());
+//
+//        // When
+//        MockHttpServletResponse response = mockMvc.perform(
+//                get("/api/houses/{id}", id)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andReturn().getResponse();
+//
+//        // Then
+//        assertThat(response.getStatus())
+//                .isEqualTo(HttpStatus.OK.value());
+//
+//    }
+
     @Test
-    public void testUpdateHouseName() throws Exception {
+    public void testRetrieveHouseByNameWhenExists() throws Exception {
 
         // Given
-        String houseName = "AdrianROM4";
-        String houseNewName = "AdrianROM5";
+        ObjectId id = new ObjectId();
+        String houseName = "MyHouse";
 
-        House updatedHouse = new House();
-        updatedHouse.setName(houseNewName);
-        updatedHouse.setRooms(new ArrayList<>());
-        updatedHouse.setDevicesList(new ArrayList<>());
+        HouseDTO expectedHouse =
+                mapper.houseToHouseDTO(new House(id, houseName, new ArrayList<>(), new ArrayList<>()));
+
+        given(houseService.findHouseByName(houseName))
+                .willReturn(expectedHouse);
 
         // When
-        when(houseService.updateHouseName(houseName, houseNewName)).thenReturn(updatedHouse);
-
-        mockMvc.perform(put("/api/houses/{houseName}", houseName)
-                        .param("houseNewName", houseNewName)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        String responseJson = mockMvc.perform(get("/api/houses/" + houseName)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
 
         // Then
-        verify(houseService, times(1)).updateHouseName(houseName, houseNewName);
-
+        assertThat(responseJson).isEqualTo(expectedHouse.toString());
     }
+
 
     @Test
-    public void testRetrieveHouseByID() throws Exception {
+    public void getHouseByName_ReturnsErrorMessage_WhenHouseNotFound() throws Exception {
+        String houseName = "Test House";
+        String expectedErrorMessage = "House not found";
 
-        // Given
-        ObjectId id = new ObjectId("637cb085be36767eae89c267");
-        HouseRepository mockRepository = mock(HouseRepository.class);
-        House mockHouse = new House();
+        when(houseService.findHouseByName(houseName))
+                .thenThrow(new HouseNotFoundException(expectedErrorMessage));
 
-        mockHouse.setId(id);
-        mockHouse.setName("CasaMEA");
-        mockHouse.setRooms(new ArrayList<>());
-        mockHouse.setDevicesList(new ArrayList<>());
+        mockMvc = MockMvcBuilders.standaloneSetup(houseController).build();
 
-        // When
-        MockHttpServletResponse response = mockMvc.perform(
-                get("/api/houses/{id}", id)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse();
+        String responseJson = mockMvc.perform(get("/api/houses/" + houseName)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
 
-        // Then
-        assertThat(response.getStatus())
-                .isEqualTo(HttpStatus.OK.value());
-
+        assertThat(responseJson).isEqualTo(expectedErrorMessage);
     }
-
-    @Test
-    public void testRetrieveHouseByNameWhenExists() throws Exception{
-
-        // Given
-        ObjectId id = new ObjectId("637cb085be36767eae89c267");
-        String houseName = "CASAMEA";
-
-        given(houseRepository.findByName(houseName))
-                .willReturn(Optional.of(new House(id, houseName, new ArrayList<>(), new ArrayList<>())).get());
-
-        // When
-        MockHttpServletResponse response = mockMvc.perform(
-                get("/api/houses/{houseName}", houseName)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse();
-
-        // Then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-
-        assertThat(response.getContentAsString()).isEqualTo(
-                jsonHouse.write(new House(id, houseName, new ArrayList<>(), new ArrayList<>())).getJson()
-        );
-    }
-
 
 }

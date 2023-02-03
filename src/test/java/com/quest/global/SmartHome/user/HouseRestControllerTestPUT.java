@@ -100,7 +100,6 @@ public class HouseRestControllerTestPUT {
         House expectedHouse = new House(id, "AdrianROM4", roomList, new ArrayList<>());
 
         HouseDTO houseDTO = new HouseDTO();
-        houseDTO.setId(new ObjectId("637cb085be36767eae89c267"));
         houseDTO.setName("AdrianROM4");
         houseDTO.setRooms(roomList);
 

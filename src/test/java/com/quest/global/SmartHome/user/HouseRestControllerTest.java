@@ -90,11 +90,9 @@ public class HouseRestControllerTest {
 
         // Then
         assertNotNull(foundHouseDTO1);
-        assertEquals(houseDTO1.getId(), foundHouseDTO1.getId());
         assertEquals(houseDTO1.getName(), foundHouseDTO1.getName());
 
         assertNotNull(foundHouseDTO2);
-        assertEquals(houseDTO2.getId(), foundHouseDTO2.getId());
         assertEquals(houseDTO2.getName(), foundHouseDTO2.getName());
 
     }

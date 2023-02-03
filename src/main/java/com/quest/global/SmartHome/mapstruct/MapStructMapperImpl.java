@@ -21,7 +21,7 @@ public class MapStructMapperImpl implements MapStructMapper {
         }
         HouseDTO houseDTO = new HouseDTO();
 
-        houseDTO.setId(house.getId());
+
         houseDTO.setName(house.getName());
         houseDTO.setRooms(roomListToRoomSlimDTOList(house.getRooms()));
 
