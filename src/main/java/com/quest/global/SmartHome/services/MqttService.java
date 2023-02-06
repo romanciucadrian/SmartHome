@@ -96,7 +96,7 @@ public class MqttService implements IMqttService {
                                 logger.info("The received message is: {}" + arrivedMessage);
 
                                 if (commandService.getAllTopics().contains(topic)) {
-                                    handleReceivedMessage(arrivedMessage);
+                                    handleReceivedMessage(topic,arrivedMessage);
                                 }
                             }
                         });
@@ -107,16 +107,31 @@ public class MqttService implements IMqttService {
         });
     }
 
-    private void handleReceivedMessage(String arrivedMessage) {
+    private void handleReceivedMessage(String topic,String arrivedMessage) {
+
         try {
             Device device = objectMapper.readValue(arrivedMessage, Device.class);
 
+            switch (topic) {
 
-            JSONObject jsonObject = new JSONObject(arrivedMessage);
+                case "stat/nspanelswitch/STATUS0" :
+                    System.out.println(topic);
+                    device.setHexId("NSPanel");
 
-            JSONArray jsonArray = new JSONArray(jsonObject.getJSONArray("ZbStatus3"));
+                case "stat/bridge/STATUS0" :
+                    System.out.println(topic);
+                    device.setHexId("ZBBridge");
 
-            device.setHexId(((JSONObject)jsonArray.get(0)).getString("Device"));
+            }
+
+            if(device.getHexId() == null){
+                JSONObject jsonObject = new JSONObject(arrivedMessage);
+
+                JSONArray jsonArray = new JSONArray(jsonObject.getJSONArray("ZbStatus3"));
+
+                device.setHexId(((JSONObject)jsonArray.get(0)).getString("Device"));
+
+            }
 
             deviceRepository.save(device);
 

@@ -1,6 +1,7 @@
 package com.quest.global.SmartHome.user;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quest.global.SmartHome.controllers.HouseController;
 import com.quest.global.SmartHome.dtos.HouseDTO;
@@ -16,25 +17,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,7 +39,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class HouseRestControllerUnitTestWithStandAlone {
+public class HouseRestControllerIntegrationTest {
 
     @Mock
     private HouseService houseService;
@@ -216,6 +212,32 @@ public class HouseRestControllerUnitTestWithStandAlone {
 
         // Then
         assertThat(responseJson).isEqualTo(expectedErrorMessage);
+    }
+
+    @Test
+    public void testGetAllHouses() throws Exception {
+
+        ObjectId id1 = new ObjectId("637cb085be36767eae89c267");
+        ObjectId id2 = new ObjectId("637cb085be36767eae89c268");
+
+        // Given
+        List<House> expectedList = new ArrayList<>();
+        expectedList.add(new House(id1, "House1", new ArrayList<>(), new ArrayList<>()));
+        expectedList.add(new House(id2, "House2", new ArrayList<>(), new ArrayList<>()));
+
+        given(houseService.listAll()).willReturn(expectedList);
+
+        // When
+        String responseJson =
+                mockMvc.perform(get("/api/houses/")
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString();
+
+        // Then
+        TypeReference<List<House>> typeReference = new TypeReference<List<House>>() {};
+        List<House> actualList = new ObjectMapper().readValue(responseJson, typeReference);
+        assertThat(actualList).isEqualTo(expectedList);
     }
 
 }
