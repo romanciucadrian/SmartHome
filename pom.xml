@@ -11,8 +11,8 @@
 	<groupId>com.app</groupId>
 	<artifactId>smarthome</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>SmartHome</name>
-	<description>SmartHome Project </description>
+	<name>smarthome</name>
+	<description>SmartHome Project</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

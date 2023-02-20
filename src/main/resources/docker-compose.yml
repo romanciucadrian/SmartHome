@@ -1,0 +1,16 @@
+version: "3"
+services:
+
+  smarthomemongodb:
+    image: mongo:latest
+    container_name: "smarthomemongodb"
+    ports:
+      - "27017:27017"
+
+  springboot-mongodb:
+    image: smarthome-docker
+    container_name: springboot-mongodb
+    ports:
+      - "8081:8081"
+    links:
+      - smarthomemongodb

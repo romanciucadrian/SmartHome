@@ -105,7 +105,8 @@ public class MqttService implements IMqttService {
     private void handleReceivedMessage(String topic,String arrivedMessage) {
 
         try {
-            Device device = objectMapper.readValue(arrivedMessage, Device.class);
+            Device device =
+                    objectMapper.readValue(arrivedMessage, Device.class);
 
             switch (topic) {
 
